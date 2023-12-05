@@ -16,4 +16,5 @@
 ### Machine learning
 
 - python
-- магия
+- catboost
+- непараметрическая регрессия
