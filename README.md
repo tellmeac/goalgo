@@ -1,23 +1,19 @@
 # goalgo
 
-## Описание работ
-
-TODO
-
 ## Стек
 
 ### Front-end
 
-- react
-- apexcharts (?)
+- react (probably)
+- apexcharts
 
 ### Back-end
 
 - Go
 - REST
-- CSV
+- sqlite
 
 ### Machine learning
 
 - python
-- (todo ?)
+- магия
