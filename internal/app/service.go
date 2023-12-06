@@ -47,10 +47,10 @@ type Stamp struct {
 	Time        int64       `json:"x"`
 	Candlestick CandleStick `json:"y"`
 
-	TopLine   float64  `json:"topLine"`
-	DownLine  float64  `json:"downLine"`
-	BlueLine  float64  `json:"blueLine"`
-	NeedPoint *float64 `json:"needPoint"` // TODO: bool value
+	TopLine   float64 `json:"topLine"`
+	DownLine  float64 `json:"downLine"`
+	BlueLine  float64 `json:"blueLine"`
+	NeedPoint *bool   `json:"needPoint"`
 }
 
 func (s *Stamp) Scan(val any) error {
