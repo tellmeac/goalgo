@@ -7,13 +7,20 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/tellmeac/goalgo/internal/app"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
+
+var messageBody = `Обнаружена благоприятная точка для покупки: 
+Цена {{ .ClosePrice }}
+Рекомендованный StopLoss: {{ .StopLoss }}
+Рекомендованный TakeProfit: {{ .TakeProfit }}`
 
 func main() {
 	ctx := context.Background()
@@ -35,8 +42,57 @@ func main() {
 	log.Fatal(run(ctx, bot, channelChatID))
 }
 
-func run(ctx context.Context, bot *tgbotapi.BotAPI, chatID int64) error {
+func buildMessage(chatID int64, chart app.Chart) (*tgbotapi.MessageConfig, bool) {
+	var last *app.Stamp
+	for idx := range chart.Data {
+		s := &chart.Data[idx]
+
+		if s.NeedPoint == nil {
+			continue
+		}
+
+		last = s
+	}
+
+	if last == nil {
+		return nil, false
+	}
+
+	args := struct {
+		ClosePrice float64
+		StopLoss   float64
+		TakeProfit float64
+	}{
+		ClosePrice: last.Candlestick.Close,
+		StopLoss:   last.Candlestick.Close - (last.TopLine - last.DownLine),
+		TakeProfit: last.Candlestick.Close + (last.TopLine - last.DownLine),
+	}
+
+	t, err := template.New("message-body").Parse(`Обнаружена благоприятная точка для покупки: 
+Цена {{ printf "%.3f" .ClosePrice }}
+Рекомендованный StopLoss: {{ printf "%.3f" .StopLoss }}
+Рекомендованный TakeProfit: {{ printf "%.3f" .TakeProfit }}`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result := &strings.Builder{}
+	if err := t.Execute(result, args); err != nil {
+		log.Fatal(err)
+	}
+
+	return &tgbotapi.MessageConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChatID: chatID,
+		},
+		Text: result.String(),
+	}, true
+}
+
+func run(ctx context.Context, bot *tgbotapi.BotAPI, publishChatID int64) error {
 	offset := time.Now().Unix()
+	// TODO: debug purposes
+	// offset := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 
 	for {
 		chart, err := poll(ctx, offset)
@@ -47,11 +103,9 @@ func run(ctx context.Context, bot *tgbotapi.BotAPI, chatID int64) error {
 
 		offset = chart.Data[len(chart.Data)-1].Time
 
-		msg := &tgbotapi.MessageConfig{
-			BaseChat: tgbotapi.BaseChat{
-				ChatID: chatID,
-			},
-			Text: fmt.Sprintf("chart update: %d", len(chart.Data)), // TODO: render data
+		msg, ok := buildMessage(publishChatID, chart)
+		if !ok {
+			continue
 		}
 
 		if _, err := bot.Send(msg); err != nil {
