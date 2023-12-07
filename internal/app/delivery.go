@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -35,6 +36,8 @@ func (h *Delivery) GetUpdates(w http.ResponseWriter, req *http.Request) {
 		}
 
 		if len(chart.Data) == 0 {
+			log.Printf("no data for requested offset: sleep...\n")
+
 			time.Sleep(backoff)
 			backoff = min(time.Minute, 2*backoff)
 
