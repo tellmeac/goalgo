@@ -13,13 +13,23 @@ func main() {
 	delivery := app.NewDelivery(service)
 
 	router := mux.NewRouter()
-	router.Path("/updates").Methods(http.MethodGet).HandlerFunc(delivery.GetUpdates)
-	router.Path("/chart").Methods(http.MethodGet).HandlerFunc(delivery.GetChart)
+	router.Path("/api/updates").Methods(http.MethodGet).HandlerFunc(delivery.GetUpdates)
+	router.Path("/api/chart").Methods(http.MethodGet).HandlerFunc(delivery.GetChart)
 
 	log.Print("Starting server")
 
-	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(
+	go log.Fatal(http.ListenAndServe(":8080", handlers.CORS(
 		handlers.AllowedOrigins([]string{"*"}),
-		handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
+		handlers.AllowedMethods([]string{
+			http.MethodGet,
+			http.MethodHead,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodOptions,
+		}),
 	)(router)))
+
+	webHandler := http.FileServer(http.Dir("./static"))
+
+	log.Fatal(http.ListenAndServe(":8000", webHandler))
 }

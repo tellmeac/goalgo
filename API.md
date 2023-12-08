@@ -2,7 +2,7 @@
 
 query unix time. returns json body (needPoint: Boolean | null)
 
-1. GET /updates?from=1701781200
+1. GET /api/updates?from=1701781200
 
 ```json
 {
@@ -25,7 +25,7 @@ query unix time. returns json body (needPoint: Boolean | null)
 }
 ```
 
-2. GET /chart?from=1701781200&to=1701954000
+2. GET /api/chart?from=1701781200&to=1701954000
 
 ```json
 {

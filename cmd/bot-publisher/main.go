@@ -17,11 +17,6 @@ import (
 	"time"
 )
 
-var messageBody = `Обнаружена благоприятная точка для покупки: 
-Цена {{ .ClosePrice }}
-Рекомендованный StopLoss: {{ .StopLoss }}
-Рекомендованный TakeProfit: {{ .TakeProfit }}`
-
 func main() {
 	ctx := context.Background()
 
