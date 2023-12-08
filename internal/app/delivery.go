@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+const (
+	defaultTicker = "SBER"
+)
+
 func NewDelivery(s *Service) *Delivery {
 	return &Delivery{service: s}
 }
@@ -19,6 +23,8 @@ type Delivery struct {
 func (h *Delivery) GetUpdates(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
+	ticker := coalesce(req.URL.Query().Get("ticker"), defaultTicker)
+
 	from := req.URL.Query().Get("from")
 
 	offset, err := strconv.ParseInt(from, 10, 64)
@@ -29,7 +35,7 @@ func (h *Delivery) GetUpdates(w http.ResponseWriter, req *http.Request) {
 
 	backoff := time.Second
 	for {
-		chart, err := h.service.GetLatest(ctx, offset)
+		chart, err := h.service.GetLatest(ctx, ticker, offset)
 		if err != nil {
 			HandleInternalError(w, err)
 			return
@@ -52,6 +58,8 @@ func (h *Delivery) GetUpdates(w http.ResponseWriter, req *http.Request) {
 func (h *Delivery) GetChart(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 
+	ticker := coalesce(req.URL.Query().Get("target"), defaultTicker)
+
 	fromStr := req.URL.Query().Get("from")
 	toStr := req.URL.Query().Get("to")
 
@@ -67,7 +75,7 @@ func (h *Delivery) GetChart(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	chart, err := h.service.GetInPeriod(ctx, from, to)
+	chart, err := h.service.GetInPeriod(ctx, ticker, from, to)
 	if err != nil {
 		HandleInternalError(w, err)
 		return
@@ -93,4 +101,14 @@ func HandleBadRequest(w http.ResponseWriter, err error) {
 func HandleInternalError(w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	_, _ = w.Write([]byte(err.Error()))
+}
+
+func coalesce(values ...string) string {
+	for _, s := range values {
+		if s != "" {
+			return s
+		}
+	}
+
+	return ""
 }

@@ -13,10 +13,11 @@ const ddl = `
 create table if not exists chart(
     id integer primary key,
     timestamp integer not null,
+    ticker text not null ,
     data text not null
 );
 
-create index if not exists chart_timestamp_idx on chart(timestamp); 
+create index if not exists chart_timestamp_idx on chart(ticker, timestamp);
 `
 
 type Config struct {
@@ -74,14 +75,18 @@ type CandleStick struct {
 }
 
 type stampSQL struct {
-	ID        int64 `db:"id"`
-	Timestamp int64 `db:"timestamp"`
-	Data      Stamp `db:"data"`
+	ID        int64  `db:"id"`
+	Timestamp int64  `db:"timestamp"`
+	Ticker    string `db:"ticker"`
+	Data      Stamp  `db:"data"`
 }
 
-func (e *Service) GetLatest(ctx context.Context, from int64) (Chart, error) {
-	args := map[string]any{"from": from}
-	q := "select * from chart where timestamp > :from order by timestamp"
+func (e *Service) GetLatest(ctx context.Context, ticker string, from int64) (Chart, error) {
+	args := map[string]any{
+		"ticker": ticker,
+		"from":   from,
+	}
+	q := "select * from chart where timestamp > :from order by timestamp and ticker = :ticker"
 
 	rows, err := e.db.NamedQueryContext(ctx, q, args)
 	if err != nil {
@@ -91,12 +96,13 @@ func (e *Service) GetLatest(ctx context.Context, from int64) (Chart, error) {
 	return rowsToChart(rows)
 }
 
-func (e *Service) GetInPeriod(ctx context.Context, from, to int64) (Chart, error) {
+func (e *Service) GetInPeriod(ctx context.Context, ticker string, from, to int64) (Chart, error) {
 	args := map[string]any{
-		"from": from,
-		"to":   to,
+		"ticker": ticker,
+		"from":   from,
+		"to":     to,
 	}
-	q := "select * from chart where timestamp > :from and timestamp < :to order by timestamp"
+	q := "select * from chart where timestamp > :from and timestamp < :to order by timestamp and ticker = :ticker"
 
 	rows, err := e.db.NamedQueryContext(ctx, q, args)
 	if err != nil {
