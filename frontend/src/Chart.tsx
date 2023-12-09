@@ -39,7 +39,6 @@ const xaxisCategories = data.slice(startinterval, endinterval).map(ds =>
     })
   )
 
-  
   const closePriseData = data.slice(startinterval, endinterval).map(ds =>
     ({
       x: getDate(ds.x),

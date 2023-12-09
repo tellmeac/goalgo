@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import './App.css';
 import { Chart } from './Chart';
+import React from 'react';
 
 function App() {
 
