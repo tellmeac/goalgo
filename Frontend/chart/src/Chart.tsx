@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import ChartComponent from "react-apexcharts";
-import axios from 'axios';
 import { useListData } from "./hooks/useListData";
-import { format } from "date-fns";
 
 export const Chart = () => {
   const data = useListData();
@@ -41,6 +39,14 @@ const xaxisCategories = data.slice(startinterval, endinterval).map(ds =>
   })
   )
 
+  
+  const closePriseData = data.slice(startinterval, endinterval).map(ds =>
+    ({
+      x: getDate(ds.x),
+      y: ds.y.close,
+    })
+    )
+
   const topLineData = data.slice(startinterval, endinterval).map(ds =>
   ({
     x: getDate(ds.x),
@@ -65,20 +71,20 @@ const xaxisCategories = data.slice(startinterval, endinterval).map(ds =>
   data.slice(startinterval, endinterval).forEach(ds => {
     if (ds.needPoint === true) {
       pointsData.push({
-        seriesIndex: 3,
+        seriesIndex: 4,
         dataPointIndex: data.indexOf(ds),
-        fillColor: '#00FF00',
-        strokeColor: '#00ff00',
-        size: 5,
+        fillColor: '#10af10',
+        strokeColor: '#10af10',
+        size: 10,
       })
     }
     if (ds.needPoint === false) {
       pointsData.push({
-        seriesIndex: 3,
+        seriesIndex: 4,
         dataPointIndex: data.indexOf(ds),
         fillColor: '#FF0000',
         strokeColor: '#FF0000',
-        size: 5,
+        size: 10,
       })
     }
   }
@@ -87,7 +93,7 @@ const xaxisCategories = data.slice(startinterval, endinterval).map(ds =>
   var options = {
     xaxis: {
       overwriteCategories: xaxisCategories,
-      tickAmount: 20,
+      tickAmount: 30,
     },
     yaxis: {
       tooltip: {
@@ -98,7 +104,7 @@ const xaxisCategories = data.slice(startinterval, endinterval).map(ds =>
     stroke: {
       dashArray: [0, 8, 8]
     },
-    colors: ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FF0000', '#0000FF'],
+    colors: ['#000000', '#FF0000', '#00FF00', '#0000FF', '#00000000', '#000000'],
     markers: {
       discrete: pointsData
     }
@@ -109,7 +115,7 @@ const xaxisCategories = data.slice(startinterval, endinterval).map(ds =>
       name: "Candle stick",
       type: "candlestick",
       data: candleStickData,
-      zIndex: 0,
+      zIndex: 11,
       fill: {
         pattern: {
           style: 'width: 20px'
@@ -136,6 +142,18 @@ const xaxisCategories = data.slice(startinterval, endinterval).map(ds =>
       type: "line",
       data: blueLineData,
       zIndex: 1
+    },
+    {
+      name: "Reccomendation",
+      type: "line",
+      data: closePriseData,
+      zIndex: 110,
+    },
+    {
+      name: "Close",
+      type: "line",
+      data: closePriseData,
+      zIndex: 110,
     }
   ]
 
