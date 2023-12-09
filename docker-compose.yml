@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  back:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      PUBLISH_CHANNEL: ${PUBLISH_CHANNEL}
+    volumes:
+      - ./sqlite.db:/app/sqlite.db
