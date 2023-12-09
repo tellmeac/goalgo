@@ -14,6 +14,17 @@ services:
       BOT_TOKEN: ${BOT_TOKEN}
       PUBLISH_CHANNEL: ${PUBLISH_CHANNEL}
       POSTGRES_URI: ${POSTGRES_URI}
+    depends_on:
+      - postgres
+
+  ml-functions:
+    container_name: ml-functions
+    image: ${ML_FUNCTIONS_IMAGE}
+    restart: always
+    environment:
+      POSTGRES_URI: ${POSTGRES_URI}
+    depends_on:
+      - postgres
 
   postgres:
     container_name: postgres-dev
@@ -28,10 +39,3 @@ services:
       PGDATA: /data/postgres
     volumes:
       - ./postgres:/data/postgres
-
-  ml-functions:
-    container_name: ml-functions
-    image: ${ML_FUNCTIONS_IMAGE}
-    restart: always
-    environment:
-      POSTGRES_URI: ${POSTGRES_URI}
