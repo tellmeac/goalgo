@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import './App.css';
 import { Chart } from './Chart';
 
-function App() {  
+function App() {
 
   const Header = styled.div`
     font-size: 30px;
@@ -19,6 +19,11 @@ function App() {
     padding-top: 5px;
   `
 
+  const ChartWrapper = styled.div`
+        width: 75vw;
+       display: inline-grid;
+  `
+
   return (
     <div className="App">
       <Header>
@@ -26,9 +31,11 @@ function App() {
           StraightCats
         </Span>
       </Header>
-      <Chart/>
+      <ChartWrapper>
+        <Chart />
+      </ChartWrapper>
       <div>
-      {'Telegram bot: '}
+        {'Telegram bot: '}
         <a href='t.me/demo_goalgo_publisher'>t.me/demo_goalgo_publisher</a>
       </div>
     </div>
