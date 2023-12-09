@@ -4,7 +4,7 @@
 
 ### Front-end
 
-- react (probably)
+- react
 - apexcharts
 
 ### Back-end
