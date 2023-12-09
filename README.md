@@ -11,10 +11,15 @@
 
 - Go
 - REST
-- sqlite
+- postgres
 
 ### Machine learning
 
 - python
 - catboost
+- psycopg2
 - непараметрическая регрессия
+
+### Dev-Ops
+
+- Docker (compose)
