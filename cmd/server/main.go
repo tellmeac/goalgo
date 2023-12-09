@@ -3,12 +3,11 @@ package main
 import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"github.com/tellmeac/goalgo/internal/app"
 	"log"
 	"net/http"
 	"os"
-
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -21,18 +20,31 @@ func main() {
 
 	log.Print("Starting server")
 
-	go log.Fatal(http.ListenAndServe(":8080", handlers.CORS(
-		handlers.AllowedOrigins([]string{"*"}),
-		handlers.AllowedMethods([]string{
-			http.MethodGet,
-			http.MethodHead,
-			http.MethodPost,
-			http.MethodPut,
-			http.MethodOptions,
-		}),
-	)(router)))
+	go func() {
+		server := &http.Server{
+			Addr: ":8080",
+			Handler: handlers.CORS(
+				handlers.AllowedOrigins([]string{"*"}),
+				handlers.AllowedMethods([]string{
+					http.MethodGet,
+					http.MethodHead,
+					http.MethodPost,
+					http.MethodPut,
+					http.MethodOptions,
+				}),
+			)(router),
+		}
 
-	webHandler := http.FileServer(http.Dir("./static"))
+		if err := server.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	log.Fatal(http.ListenAndServe(":8000", webHandler))
+	webPath := os.Getenv("WEB_PATH")
+	if webPath == "" {
+		log.Print("empty WEB_PATH")
+		return // TODO: signals
+	}
+
+	log.Fatal(http.ListenAndServe(":8000", http.FileServer(http.Dir(webPath))))
 }

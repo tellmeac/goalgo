@@ -12,4 +12,4 @@ COPY . .
 RUN go build -o ./server ./cmd/server
 RUN go build -o ./bot ./cmd/bot-publisher
 
-CMD ./server & ./bot
+CMD ./server

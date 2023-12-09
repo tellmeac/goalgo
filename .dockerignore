@@ -1,3 +1,5 @@
 .env
 .git
 postgres/
+demo/
+frontend/node_modules

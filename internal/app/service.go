@@ -12,8 +12,8 @@ const ddl = `
 create table if not exists chart(
     id serial,
     timestamp integer not null,
-    ticker text not null ,
-    data text not null
+    ticker text not null,
+    data json not null
 );
 
 create index if not exists chart_timestamp_idx on chart(ticker, timestamp);
@@ -54,12 +54,12 @@ type Stamp struct {
 }
 
 func (s *Stamp) Scan(val any) error {
-	str, ok := val.(string)
+	bytes, ok := val.([]byte)
 	if !ok {
 		return errors.New("invalid value")
 	}
 
-	if err := json.Unmarshal([]byte(str), s); err != nil {
+	if err := json.Unmarshal(bytes, s); err != nil {
 		return err
 	}
 
@@ -85,7 +85,7 @@ func (e *Service) GetLatest(ctx context.Context, ticker string, from int64) (Cha
 		"ticker": ticker,
 		"from":   from,
 	}
-	q := "select * from chart where timestamp > :from order by timestamp and ticker = :ticker"
+	q := "select * from chart where timestamp > :from and ticker = :ticker order by timestamp"
 
 	rows, err := e.db.NamedQueryContext(ctx, q, args)
 	if err != nil {

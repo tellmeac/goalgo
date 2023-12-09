@@ -21,8 +21,16 @@ func main() {
 	ctx := context.Background()
 
 	token := os.Getenv("BOT_TOKEN")
+	if token == "" {
+		log.Fatal("empty BOT_TOKEN")
+	}
 
-	channelChatID, err := strconv.ParseInt(os.Getenv("PUBLISH_CHANNEL"), 10, 64)
+	publishChannel := os.Getenv("PUBLISH_CHANNEL")
+	if publishChannel == "" {
+		log.Fatal("empty PUBLISH_CHANNEL")
+	}
+
+	channelChatID, err := strconv.ParseInt(publishChannel, 10, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -104,8 +112,7 @@ func run(ctx context.Context, bot *tgbotapi.BotAPI, publishChatID int64) error {
 	for {
 		chart, err := poll(ctx, offset)
 		if err != nil {
-			log.Printf("poll err: %s", err.Error())
-			continue
+			log.Fatalf("poll err: %s", err.Error())
 		}
 
 		offset = chart.Data[len(chart.Data)-1].Time

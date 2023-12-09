@@ -33,7 +33,7 @@ func (h *Delivery) GetUpdates(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	backoff := time.Second
+	backoff := 5 * time.Second
 	for {
 		chart, err := h.service.GetLatest(ctx, ticker, offset)
 		if err != nil {
