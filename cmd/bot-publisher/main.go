@@ -49,7 +49,8 @@ func buildMessage(chatID int64, chart app.Chart) (*tgbotapi.MessageConfig, bool)
 		last = s
 	}
 
-	if last == nil {
+	if last == nil || last.NeedPoint == nil {
+		log.Print("DEBUG: no NeedPoint from chart.")
 		return nil, false
 	}
 
@@ -63,10 +64,21 @@ func buildMessage(chatID int64, chart app.Chart) (*tgbotapi.MessageConfig, bool)
 		TakeProfit: last.Candlestick.Close + (last.TopLine - last.DownLine),
 	}
 
-	t, err := template.New("message-body").Parse(`Обнаружена благоприятная точка для покупки: 
+	var messageTemplate string
+	if *last.NeedPoint {
+		messageTemplate = `Обнаружена благоприятная точка для покупки: 
 Цена {{ printf "%.3f" .ClosePrice }}
 Рекомендованный StopLoss: {{ printf "%.3f" .StopLoss }}
-Рекомендованный TakeProfit: {{ printf "%.3f" .TakeProfit }}`)
+Рекомендованный TakeProfit: {{ printf "%.3f" .TakeProfit }}`
+
+	} else {
+		messageTemplate = `Обнаружена благоприятная точка для продажи: 
+Цена {{ printf "%.3f" .ClosePrice }}
+Рекомендованный StopLoss: {{ printf "%.3f" .TakeProfit }}
+Рекомендованный TakeProfit: {{ printf "%.3f" .StopLoss }}`
+	}
+
+	t, err := template.New("message-body").Parse(messageTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +99,7 @@ func buildMessage(chatID int64, chart app.Chart) (*tgbotapi.MessageConfig, bool)
 func run(ctx context.Context, bot *tgbotapi.BotAPI, publishChatID int64) error {
 	offset := time.Now().Unix()
 	// TODO: debug purposes
-	// offset := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
+	// offset := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 
 	for {
 		chart, err := poll(ctx, offset)
@@ -113,7 +125,7 @@ func poll(ctx context.Context, from int64) (app.Chart, error) {
 	for {
 		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://localhost:8080/updates?from=%d", from), nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("http://localhost:8080/api/updates?from=%d", from), nil)
 		if err != nil {
 			cancel()
 			return app.Chart{}, err
