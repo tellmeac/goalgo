@@ -10,7 +10,7 @@ import (
 
 const ddl = `
 create table if not exists chart(
-    id integer primary key,
+    id serial,
     timestamp integer not null,
     ticker text not null ,
     data text not null
