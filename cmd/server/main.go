@@ -6,10 +6,13 @@ import (
 	"github.com/tellmeac/goalgo/internal/app"
 	"log"
 	"net/http"
+	"os"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	service := app.New(&app.Config{DatabaseConn: "./sqlite.db"})
+	service := app.New(&app.Config{DatabaseConn: os.Getenv("POSTGRES_URI")})
 	delivery := app.NewDelivery(service)
 
 	router := mux.NewRouter()

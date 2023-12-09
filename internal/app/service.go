@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	_ "github.com/glebarez/go-sqlite"
 	"github.com/jmoiron/sqlx"
 	"log"
 )
@@ -25,7 +24,7 @@ type Config struct {
 }
 
 func New(c *Config) *Service {
-	db, err := sqlx.Open("sqlite", c.DatabaseConn)
+	db, err := sqlx.Open("postgres", c.DatabaseConn)
 	if err != nil {
 		log.Fatal(err)
 	}

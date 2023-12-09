@@ -2,14 +2,36 @@ version: "3.7"
 
 services:
   back:
+    container_name: back-dev
     build:
       context: .
       dockerfile: ./Dockerfile
+    restart: always
     ports:
       - "8080:8080"
       - "8000:8000"
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
       PUBLISH_CHANNEL: ${PUBLISH_CHANNEL}
+      POSTGRES_URI: ${POSTGRES_URI}
+
+  postgres:
+    container_name: postgres-dev
+    image: postgres:14
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
     volumes:
-      - ./sqlite.db:/app/sqlite.db
+      - ./postgres:/data/postgres
+
+  ml-functions:
+    container_name: ml-functions
+    image: ${ML_FUNCTIONS_IMAGE}
+    restart: always
+    environment:
+      POSTGRES_URI: ${POSTGRES_URI}
