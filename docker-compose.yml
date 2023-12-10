@@ -16,7 +16,7 @@ services:
       POSTGRES_URI: ${POSTGRES_URI:-postgres://service:service@postgres:5432/service?sslmode=disable}
       WEB_PATH: /app/static
     volumes:
-      - ./demo/build:/app/static
+      - ./web/build:/app/static
     depends_on:
       - postgres
 
